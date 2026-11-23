@@ -1,0 +1,307 @@
+# Semantic model: the single source of business meaning for the data agent.
+#
+# Conventions
+#   - Every entity's base table is aliased `t`. Join aliases are declared per entity;
+#     the compiler adds a join only when an expression in the query references its alias.
+#   - Expressions are SQL fragments (Postgres). They are parsed into sqlglot trees; user
+#     values never appear here, only bind parameters added by the compiler.
+#   - `{tz}` is replaced with BANK_TZ at load time.
+#   - `row_security` is the branch expression for the entity; the compiler appends
+#     `<expr> = ANY(:user_branches)`.
+
+lookups:
+  segment: {R: Retail, P: Premier, C: Corporate}
+  drcr: {D: Debit, C: Credit}
+  txn_channel: {BRANCH: Branch, OBDX_MOB: Mobile, OBDX_WEB: Web, ATM: ATM, POS: POS}
+  user_status: {A: Active, L: Locked, D: Disabled}
+
+shared_dimensions:   # reused by several entities; `expr` overridden per entity where needed
+  branch:
+    description: Branch name
+    values: [Salmiya, Kuwait City Main, Hawalli, Sharq, Jahra, Sulaibikhat, Doha, Abdali,
+             Fahaheel, Ahmadi, Mangaf, Wafra]
+  region:
+    description: Branch region
+    values: [NORTH, SOUTH, CENTRAL]
+
+entities:
+  cust_account:
+    table: core.cust_account
+    description: Core banking accounts (FLEXCUBE-style). One row per account.
+    joins:
+      br: {table: core.branch_master, join_on: "br.branch_code = t.branch_code"}
+      ac: {table: core.account_class, join_on: "ac.account_class = t.account_class"}
+      cu: {table: core.customer, join_on: "cu.customer_no = t.customer_no"}
+      oa: {table: obdx.origination_application, type: left,
+           join_on: "oa.account_no = t.account_no AND oa.status = 'APPROVED'"}
+    row_security: t.branch_code
+    time_dimensions:
+      account_open_date: {expr: t.account_open_date, type: date}
+      closed_date: {expr: t.closed_date, type: date}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      account_class:
+        expr: t.account_class
+        description: Account product code
+        values: [SAVREG, SAVPLS, CURIND, CURCOR, SALACC, TD03M, TD06M, TD12M]
+      product_family:
+        expr: ac.product_family
+        description: CASA (current and savings) or TD (term deposit)
+        values: [CASA, TD]
+      segment: {expr: cu.segment, lookup: segment, description: Customer segment}
+      channel:
+        expr: "COALESCE(oa.channel, 'BRANCH')"
+        description: Where the account was opened (OBDX mobile, OBDX web, or branch)
+        values: [MOBILE, WEB, BRANCH]
+
+  transaction:
+    table: core.transaction
+    description: Core banking transactions. One row per posting attempt.
+    joins:
+      a: {table: core.cust_account, join_on: "a.account_no = t.account_no"}
+      br: {table: core.branch_master, join_on: "br.branch_code = a.branch_code", requires: [a]}
+      tt: {table: core.txn_type, join_on: "tt.txn_code = t.txn_code"}
+    row_security: a.branch_code
+    time_dimensions:
+      txn_date: {expr: t.txn_date, type: date}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      channel: {expr: t.channel, lookup: txn_channel, description: Channel the transaction came through}
+      txn_group:
+        expr: tt.txn_group
+        description: Transaction group
+        values: [TRANSFER, BILLPAY, CASH, CARD, CHARGE]
+      drcr: {expr: t.drcr_ind, lookup: drcr, description: Debit or credit}
+
+  digx_user:
+    table: obdx.digx_user
+    description: OBDX digital banking users. Branch = the customer's home branch.
+    joins:
+      cu: {table: core.customer, join_on: "cu.customer_no = t.customer_no"}
+      br: {table: core.branch_master, join_on: "br.branch_code = cu.home_branch", requires: [cu]}
+    row_security: cu.home_branch
+    time_dimensions:
+      registered_at: {expr: t.registered_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      user_type: {expr: t.user_type, values: [RETAIL, CORPORATE], description: Digital user type}
+      segment: {expr: cu.segment, lookup: segment, description: Customer segment}
+      user_status: {expr: t.status, lookup: user_status, description: Digital user status}
+
+  digx_user_session:
+    table: obdx.digx_user_session
+    description: OBDX login sessions, successful and failed. Branch = user's home branch.
+    joins:
+      u: {table: obdx.digx_user, join_on: "u.user_id = t.user_id"}
+      cu: {table: core.customer, join_on: "cu.customer_no = u.customer_no", requires: [u]}
+      br: {table: core.branch_master, join_on: "br.branch_code = cu.home_branch", requires: [cu]}
+    row_security: cu.home_branch
+    time_dimensions:
+      login_at: {expr: t.login_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      channel: {expr: t.channel, values: [MOBILE, WEB], description: Digital channel}
+      device_os: {expr: t.device_os, values: [IOS, ANDROID, WINDOWS, MACOS], description: Device OS}
+      failure_reason:
+        expr: t.failure_reason
+        values: [BAD_PASSWORD, OTP_FAIL, LOCKED]
+        description: Why a login failed
+      hour:
+        expr: "CAST(EXTRACT(HOUR FROM t.login_at AT TIME ZONE '{tz}') AS INT)"
+        type: number
+        description: Hour of day of the login (bank time zone, 0-23)
+
+  origination_application:
+    table: obdx.origination_application
+    description: OBDX digital account-opening applications.
+    joins:
+      cu: {table: core.customer, join_on: "cu.customer_no = t.customer_no"}
+      br: {table: core.branch_master, join_on: "br.branch_code = cu.home_branch", requires: [cu]}
+    row_security: cu.home_branch
+    time_dimensions:
+      started_at: {expr: t.started_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      channel: {expr: t.channel, values: [MOBILE, WEB], description: Digital channel}
+      account_class:
+        expr: t.account_class
+        values: [SAVREG, SAVPLS, CURIND, CURCOR, SALACC, TD03M, TD06M, TD12M]
+        description: Account product applied for
+      application_status:
+        expr: t.status
+        values: [STARTED, SUBMITTED, APPROVED, REJECTED, ABANDONED]
+        description: Application status
+
+  wf_instance:
+    table: atum.wf_instance
+    description: Atumverse workflow cases (loan origination, CASA onboarding).
+    joins:
+      br: {table: core.branch_master, join_on: "br.branch_code = t.branch_code"}
+      st: {table: atum.wf_stage, join_on: "st.wf_code = t.wf_code AND st.stage_code = t.current_stage"}
+      f: {table: atum.wf_instance_flat, type: left, join_on: "f.instance_id = t.instance_id"}
+    row_security: t.branch_code
+    time_dimensions:
+      created_at: {expr: t.created_at, type: timestamp}
+      completed_at: {expr: t.completed_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      workflow: &workflow
+        expr: t.wf_code
+        values: [LOAN_ORIG, CASA_ONBOARD]
+        description: Workflow (LOAN_ORIG = personal loan, CASA_ONBOARD = account opening)
+      stage:
+        expr: t.current_stage
+        sort: st.stage_seq
+        values: &stages [DRAFT, KYC_CHECK, DOC_VERIFY, CREDIT_ASSESS, APPROVAL, OFFER_ACCEPT,
+                         DISBURSE, EKYC, AML_SCREEN, CHECKER_APPROVAL, ACCOUNT_CREATE, CLOSED,
+                         REJECTED, CANCELLED]
+        description: Current workflow stage (sorted in process order)
+      product: &product
+        expr: f.product
+        values: [PL_STD, PL_GOV, PL_PREM, SAVREG, SAVPLS, CURIND, CURCOR, SALACC]
+        description: Product on the application (decoded payload)
+
+  wf_stage_history:
+    table: atum.wf_stage_history
+    description: One row per stage visit of an Atumverse case. END stages are never "exited".
+    joins:
+      i: {table: atum.wf_instance, join_on: "i.instance_id = t.instance_id"}
+      st: {table: atum.wf_stage, join_on: "st.wf_code = i.wf_code AND st.stage_code = t.stage_code",
+           requires: [i]}
+      br: {table: core.branch_master, join_on: "br.branch_code = i.branch_code", requires: [i]}
+      f: {table: atum.wf_instance_flat, type: left, join_on: "f.instance_id = t.instance_id"}
+    row_security: i.branch_code
+    time_dimensions:
+      exited_at: {expr: t.exited_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      workflow: {<<: *workflow, expr: i.wf_code}
+      stage:
+        expr: t.stage_code
+        sort: st.stage_seq
+        values: *stages
+        description: Workflow stage (sorted in process order)
+      actor_role:
+        expr: t.actor_role
+        values: [CUSTOMER, SYSTEM, OPS_MAKER, CREDIT_ANALYST, CREDIT_APPROVER, OPS_CHECKER]
+        description: Role that completed the stage visit
+      product: *product
+
+  wf_instance_flat:
+    table: atum.wf_instance_flat
+    description: Decoded business fields of Atumverse payloads (written by the decoder).
+    joins:
+      i: {table: atum.wf_instance, join_on: "i.instance_id = t.instance_id"}
+      br: {table: core.branch_master, join_on: "br.branch_code = i.branch_code", requires: [i]}
+    row_security: i.branch_code
+    time_dimensions:
+      created_at: {expr: i.created_at, type: timestamp}
+    dimensions:
+      branch: {expr: br.branch_name, shared: branch}
+      region: {expr: br.region, shared: region}
+      workflow: {<<: *workflow, expr: i.wf_code}
+      product: {<<: *product, expr: t.product}
+      purpose:
+        expr: t.purpose
+        values: [CAR, HOME_RENO, EDUCATION, TRAVEL, MEDICAL, DEBT_CONSOL, WEDDING]
+        description: Loan purpose
+      salary_band: {expr: t.salary_band, values: ["<1000", "1000-2499", "2500+"],
+                    description: Monthly salary band in KWD (raw salary is never stored)}
+      employment_type:
+        expr: t.employment_type
+        values: [SALARIED, GOVERNMENT, SELF_EMP, STUDENT]
+        description: Applicant employment type
+      credit_score_band: {expr: t.credit_score_band, values: ["<600", "600-699", "700+"],
+                          description: Credit score band}
+      decision: {expr: t.decision, values: [APPROVE, REJECT], description: Credit decision}
+
+# What the agent may read at all. Shared by the compiler (cross-check at load) and the SQL
+# validator (allowlist + row-security wrapper for LLM-written SQL). Must match the
+# agent_ro grants in infra/db/04_roles_rls.sql (a DB test checks this).
+allowlist:
+  core.branch_master:
+    reference: true
+    columns: [branch_code, branch_name, city, region]
+  core.account_class:
+    reference: true
+    columns: [account_class, description, product_family]
+  core.txn_type:
+    reference: true
+    columns: [txn_code, description, txn_group]
+  core.customer:
+    columns: [customer_no, segment, home_branch, created_date]
+    row_security: "t.home_branch = ANY(:user_branches)"
+  core.cust_account:
+    columns: [account_no, customer_no, branch_code, account_class, ccy, account_open_date,
+              record_stat, auth_stat, closed_date]
+    row_security: "t.branch_code = ANY(:user_branches)"
+  core.transaction:
+    columns: [txn_ref, account_no, txn_code, drcr_ind, lcy_amount, txn_date, txn_ts, channel,
+              status, session_id]
+    row_security: >-
+      EXISTS (SELECT 1 FROM core.cust_account rs WHERE rs.account_no = t.account_no
+      AND rs.branch_code = ANY(:user_branches))
+  obdx.digx_user:
+    columns: [user_id, customer_no, user_type, status, registered_at, last_login_at,
+              failed_attempts]
+    row_security: >-
+      EXISTS (SELECT 1 FROM core.customer rs WHERE rs.customer_no = t.customer_no
+      AND rs.home_branch = ANY(:user_branches))
+  obdx.digx_user_session:
+    columns: [session_id, user_id, channel, device_os, login_at, last_activity_at, logout_at,
+              login_status, failure_reason]
+    row_security: >-
+      EXISTS (SELECT 1 FROM obdx.digx_user rsu JOIN core.customer rs
+      ON rs.customer_no = rsu.customer_no WHERE rsu.user_id = t.user_id
+      AND rs.home_branch = ANY(:user_branches))
+  obdx.origination_application:
+    columns: [application_id, customer_no, account_no, account_class, channel, status,
+              started_at, completed_at]
+    row_security: >-
+      EXISTS (SELECT 1 FROM core.customer rs WHERE rs.customer_no = t.customer_no
+      AND rs.home_branch = ANY(:user_branches))
+  atum.wf_definition:
+    reference: true
+    columns: [wf_code, wf_name, app_name, version, is_active]
+  atum.wf_stage:
+    reference: true
+    columns: [wf_code, stage_code, stage_seq, stage_name, stage_type, sla_hours, assigned_role]
+  atum.wf_instance:
+    columns: [instance_id, wf_code, wf_version, reference_no, customer_no, branch_code,
+              current_stage, status, created_at, updated_at, completed_at, payload_format]
+    row_security: "t.branch_code = ANY(:user_branches)"
+  atum.wf_stage_history:
+    columns: [history_id, instance_id, stage_code, entered_at, exited_at, action, actor_user,
+              actor_role, sla_breached, event_data]
+    row_security: >-
+      EXISTS (SELECT 1 FROM atum.wf_instance rs WHERE rs.instance_id = t.instance_id
+      AND rs.branch_code = ANY(:user_branches))
+  atum.wf_document:
+    columns: [doc_id, instance_id, doc_type, mime_type, size_bytes, uploaded_at]
+    row_security: >-
+      EXISTS (SELECT 1 FROM atum.wf_instance rs WHERE rs.instance_id = t.instance_id
+      AND rs.branch_code = ANY(:user_branches))
+  atum.wf_instance_flat:
+    columns: [instance_id, product, purpose, amount_requested, tenor_months, salary_band,
+              employment_type, credit_score_band, dbr_pct, decision, amount_approved, decoded_at]
+    row_security: >-
+      EXISTS (SELECT 1 FROM atum.wf_instance rs WHERE rs.instance_id = t.instance_id
+      AND rs.branch_code = ANY(:user_branches))
+
+# Never queryable; listed so the loader can assert none of them is allowlisted.
+blocked_columns:
+  - core.customer.full_name          # PII
+  - core.customer.national_id        # PII
+  - core.customer.mobile_no          # PII
+  - atum.wf_instance.payload_json    # raw Atumverse payload
+  - atum.wf_instance.payload_blob
+  - atum.wf_instance.payload_raw
+  - atum.wf_document.content         # document BLOB
+  - atum.wf_document.ocr_json        # OCR output (contains PII)

@@ -1,0 +1,107 @@
+# Verified question -> MetricQuery pairs. The planner gets the 3-5 most similar ones as
+# few-shot examples. Every entry is checked in tests: it must validate, compile and run.
+# Approved thumbs-up feedback (phase 4) becomes new entries here after curation.
+
+- question: How many accounts were opened last quarter by branch?
+  query: {metric: accounts_opened, dimensions: [branch], time: {period: last_quarter},
+          order_by: {field: value, dir: desc}}
+- question: Accounts opened digitally vs in branch this year
+  query: {metric: accounts_opened, dimensions: [channel], time: {period: ytd}}
+- question: CASA accounts opened by region last month
+  query: {metric: accounts_opened, dimensions: [region],
+          filters: [{dimension: product_family, op: in, values: [CASA]}],
+          time: {period: last_month}}
+- question: New accounts per month over the last 12 months
+  query: {metric: accounts_opened, time: {period: last_12_months}, grain: month}
+- question: How many accounts were closed this quarter by product family?
+  query: {metric: accounts_closed, dimensions: [product_family], time: {period: this_quarter}}
+- question: How many active accounts do we have by segment?
+  query: {metric: active_accounts, dimensions: [segment], time: {period: today}}
+- question: Digital registrations by user type this year
+  query: {metric: digital_registrations, dimensions: [user_type], time: {period: ytd}}
+- question: Monthly active digital users on mobile vs web, last 12 months
+  query: {metric: active_digital_users, dimensions: [channel], time: {period: last_12_months},
+          grain: month}
+- question: Logins by hour of day yesterday
+  query: {metric: logins, dimensions: [hour], time: {period: yesterday},
+          order_by: {field: hour, dir: asc}}
+- question: Failed logins by reason this week
+  query: {metric: failed_logins, dimensions: [failure_reason], time: {period: this_week}}
+- question: Average session length on iOS vs Android last month
+  query: {metric: avg_session_minutes, dimensions: [device_os],
+          filters: [{dimension: device_os, op: in, values: [IOS, ANDROID]}],
+          time: {period: last_month}}
+- question: Mobile vs web transaction value by month, last 12 months
+  query: {metric: txn_value_kwd, dimensions: [channel],
+          filters: [{dimension: channel, op: in, values: [Mobile, Web]}],
+          time: {period: last_12_months}, grain: month}
+- question: Number of bill payments last week
+  query: {metric: txn_count, filters: [{dimension: txn_group, op: in, values: [BILLPAY]}],
+          time: {period: last_week}}
+- question: Which channel has the highest transaction failure rate this month?
+  query: {metric: failed_txn_rate, dimensions: [channel], time: {period: this_month},
+          order_by: {field: value, dir: desc}, limit: 1}
+- question: What is the conversion rate of mobile account applications?
+  query: {metric: application_conversion,
+          filters: [{dimension: channel, op: in, values: [MOBILE]}], time: {period: ytd}}
+- question: How many loan applications are sitting in credit assessment right now?
+  query: {metric: applications_in_stage,
+          filters: [{dimension: workflow, op: in, values: [LOAN_ORIG]},
+                    {dimension: stage, op: in, values: [CREDIT_ASSESS]}]}
+- question: Current loan pipeline by stage
+  query: {metric: applications_in_stage, dimensions: [stage],
+          filters: [{dimension: workflow, op: in, values: [LOAN_ORIG]}]}
+- question: How many account-opening cases were completed last month by branch?
+  query: {metric: applications_completed, dimensions: [branch],
+          filters: [{dimension: workflow, op: in, values: [CASA_ONBOARD]}],
+          time: {period: last_month}}
+- question: Average time spent in each loan stage last month
+  query: {metric: stage_dwell_hours, dimensions: [stage],
+          filters: [{dimension: workflow, op: in, values: [LOAN_ORIG]}],
+          time: {period: last_month}}
+- question: Which stage breaches SLA most often?
+  query: {metric: sla_breach_rate, dimensions: [stage], time: {period: last_12_months},
+          order_by: {field: value, dir: desc}, limit: 1}
+- question: How often are applications sent back at document verification?
+  query: {metric: return_rate, filters: [{dimension: stage, op: in, values: [DOC_VERIFY]}],
+          time: {period: last_12_months}}
+- question: Loan approval rate by product this year
+  query: {metric: approval_rate, dimensions: [product], time: {period: ytd}}
+- question: Total loan amount requested by purpose this quarter
+  query: {metric: loan_amount_requested_kwd, dimensions: [purpose], time: {period: this_quarter}}
+- question: Approved loan amount by product last quarter
+  query: {metric: loan_amount_approved_kwd, dimensions: [product], time: {period: last_quarter}}
+- question: Average DBR by salary band this year
+  query: {metric: avg_dbr_pct, dimensions: [salary_band], time: {period: ytd}}
+
+# Arabic
+- question: كم عدد الحسابات الجديدة هذا الشهر؟
+  query: {metric: accounts_opened, time: {period: this_month}}
+- question: كم عدد الحسابات المفتوحة في كل فرع في الربع الماضي؟
+  query: {metric: accounts_opened, dimensions: [branch], time: {period: last_quarter}}
+- question: ما هي نسبة الموافقة على القروض لكل فرع؟
+  query: {metric: approval_rate, dimensions: [branch], time: {period: ytd}}
+- question: محاولات الدخول الفاشلة حسب السبب هذا الأسبوع
+  query: {metric: failed_logins, dimensions: [failure_reason], time: {period: this_week}}
+- question: قيمة المعاملات عبر الجوال شهرياً خلال آخر ١٢ شهراً
+  query: {metric: txn_value_kwd, filters: [{dimension: channel, op: in, values: [Mobile]}],
+          time: {period: last_12_months}, grain: month}
+- question: كم عدد المستخدمين النشطين رقمياً الشهر الماضي؟
+  query: {metric: active_digital_users, time: {period: last_month}}
+- question: ما متوسط الوقت في كل مرحلة من مراحل القروض الشهر الماضي؟
+  query: {metric: stage_dwell_hours, dimensions: [stage],
+          filters: [{dimension: workflow, op: in, values: [LOAN_ORIG]}],
+          time: {period: last_month}}
+- question: كم عدد الحسابات المغلقة هذا العام؟
+  query: {metric: accounts_closed, time: {period: ytd}}
+- question: نسبة تجاوز اتفاقية مستوى الخدمة لكل مرحلة في آخر ١٢ شهراً
+  query: {metric: sla_breach_rate, dimensions: [stage], time: {period: last_12_months}}
+- question: كم عدد التسجيلات الرقمية الجديدة هذا الربع؟
+  query: {metric: digital_registrations, time: {period: this_quarter}}
+- question: كم عدد الحسابات المفتوحة في فرع السالمية هذا العام؟
+  query: {metric: accounts_opened, filters: [{dimension: branch, op: in, values: [Salmiya]}],
+          time: {period: ytd}}
+- question: عدد الحسابات المفتوحة حسب المنطقة الشهر الماضي
+  query: {metric: accounts_opened, dimensions: [region], time: {period: last_month}}
+- question: كم عدد الحسابات القائمة حالياً حسب فئة العميل؟
+  query: {metric: active_accounts, dimensions: [segment], time: {period: today}}

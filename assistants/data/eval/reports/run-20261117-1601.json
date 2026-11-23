@@ -1,0 +1,151 @@
+{
+ "runs": [
+  {
+   "summary": {
+    "provider": "ollama",
+    "model": "bcai-qwen3-8b",
+    "cases": 1,
+    "overall": [
+     1,
+     1
+    ],
+    "paths": {
+     "metric": [
+      1,
+      1
+     ],
+     "sql": [
+      0,
+      0
+     ],
+     "api": [
+      0,
+      0
+     ],
+     "clarify": [
+      0,
+      0
+     ],
+     "refused": [
+      0,
+      0
+     ]
+    },
+    "english": [
+     1,
+     1
+    ],
+    "arabic": [
+     0,
+     0
+    ],
+    "security": [
+     0,
+     0
+    ],
+    "security_held": [
+     0,
+     0
+    ],
+    "ttfa_p50_s": 29.607,
+    "ttfa_p95_s": 29.607,
+    "metric_ttfa_p50_s": 29.607,
+    "total_p50_s": 29.648,
+    "total_p95_s": 29.648,
+    "tokens_in": 4503,
+    "tokens_out": 40,
+    "tokens_per_question": 4543,
+    "cost_usd": 0.0,
+    "retries": 0,
+    "structured_fallbacks": 0,
+    "templated_answers": 0
+   },
+   "results": [
+    {
+     "id": "E31",
+     "lang": "en",
+     "question": "This month",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "12 row(s) match",
+     "security": false,
+     "latency_ms": 29648,
+     "first_answer_ms": 29607,
+     "input_tokens": 4503,
+     "output_tokens": 40,
+     "grounded": true,
+     "plan": {
+      "metric": "accounts_opened",
+      "dimensions": [
+       "branch"
+      ],
+      "time": {
+       "period": "this_month"
+      }
+     },
+     "answer": "Accounts opened by branches this month (1 Nov 2026 – 17 Nov 2026) are as follows: Kuwait City Main opened 91 accounts, Salmiya opened 75 accounts, Hawalli opened 48 accounts, Fahaheel opened 48 accounts, Sharq opened 47 accounts, Jahra opened 46 accounts, Mangaf opened 46 accounts, Ahmadi opened 37 accounts, Wafra opened 32 accounts, Doha opened 29 accounts, Sulaibikhat opened 23 accounts, and Abdali opened 22 accounts.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Kuwait City Main",
+       91
+      ],
+      [
+       "Salmiya",
+       75
+      ],
+      [
+       "Hawalli",
+       48
+      ],
+      [
+       "Fahaheel",
+       48
+      ],
+      [
+       "Sharq",
+       47
+      ],
+      [
+       "Jahra",
+       46
+      ],
+      [
+       "Mangaf",
+       46
+      ],
+      [
+       "Ahmadi",
+       37
+      ],
+      [
+       "Wafra",
+       32
+      ],
+      [
+       "Doha",
+       29
+      ],
+      [
+       "Sulaibikhat",
+       23
+      ],
+      [
+       "Abdali",
+       22
+      ]
+     ],
+     "columns": [
+      "branch",
+      "value"
+     ],
+     "security_held": null
+    }
+   ]
+  }
+ ],
+ "skipped": {}
+}

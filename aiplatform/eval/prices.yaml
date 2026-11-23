@@ -1,0 +1,7 @@
+# USD per million tokens, used for "token cost" in the eval report.
+# Fill in the bank's contracted (or current list) prices before comparing providers;
+# null means "not set" and the report shows tokens only. Local models cost nothing per call.
+ollama: {input_per_mtok: 0, output_per_mtok: 0}
+anthropic: {input_per_mtok: null, output_per_mtok: null}
+gemini: {input_per_mtok: null, output_per_mtok: null}
+cohere: {input_per_mtok: null, output_per_mtok: null}

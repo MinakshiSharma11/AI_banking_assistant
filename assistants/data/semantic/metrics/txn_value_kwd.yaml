@@ -1,0 +1,12 @@
+metric: txn_value_kwd
+label: Transaction value (KWD)
+description: Sum of local-currency amount (KWD) of posted transactions in the period.
+entity: transaction
+measure: {agg: sum, column: lcy_amount}
+time_dimension: txn_date
+default_filters:
+  - "status = 'P'"
+dimensions: [channel, txn_group, drcr, branch, region]
+synonyms: [transaction value, transaction amount, value transacted, total amount, قيمة المعاملات, قيمة العمليات]
+unit: KWD
+decimals: 3

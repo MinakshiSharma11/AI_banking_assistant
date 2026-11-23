@@ -1,0 +1,11 @@
+metric: applications_completed
+label: Applications completed
+description: Atumverse cases with status COMPLETED whose completion time falls in the period.
+entity: wf_instance
+measure: {agg: count}
+time_dimension: completed_at
+default_filters:
+  - "status = 'COMPLETED'"
+dimensions: [workflow, branch, region, product]
+synonyms: [completed applications, finished cases, closed applications, الطلبات المكتملة]
+unit: applications

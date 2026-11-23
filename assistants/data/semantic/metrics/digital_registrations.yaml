@@ -1,0 +1,9 @@
+metric: digital_registrations
+label: Digital registrations
+description: OBDX digital banking users who registered in the period.
+entity: digx_user
+measure: {agg: count_distinct, column: user_id}
+time_dimension: registered_at
+dimensions: [user_type, branch, region, segment]
+synonyms: [new digital users, online banking registrations, app registrations, sign-ups, تسجيلات رقمية, التسجيل في الخدمات الرقمية]
+unit: users

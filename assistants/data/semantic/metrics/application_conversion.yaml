@@ -1,0 +1,9 @@
+metric: application_conversion
+label: Application conversion rate
+description: Approved digital account applications divided by all applications started in the period.
+entity: origination_application
+measure: {agg: ratio, numerator: "t.status = 'APPROVED'", denominator: "TRUE"}
+time_dimension: started_at
+dimensions: [channel, account_class, branch, region]
+synonyms: [conversion rate, application conversion, onboarding conversion, approval funnel, نسبة التحويل]
+unit: ratio

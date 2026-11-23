@@ -1,0 +1,52 @@
+name: bcai
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bcai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bcai_dev_only}
+      POSTGRES_DB: ${POSTGRES_DB:-bankdata}
+    ports:
+      - "${DB_PORT:-5544}:5432"
+    volumes:
+      - bcai_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bcai} -d ${POSTGRES_DB:-bankdata}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: {context: .., dockerfile: infra/api.Dockerfile}
+    env_file: ../.env
+    environment:
+      ADMIN_DATABASE_URL: postgresql://${POSTGRES_USER:-bcai}:${POSTGRES_PASSWORD:-bcai_dev_only}@db:5432/${POSTGRES_DB:-bankdata}
+      AGENT_DATABASE_URL: postgresql://agent_ro:${AGENT_RO_PASSWORD:-agent_ro_dev_only}@db:5432/${POSTGRES_DB:-bankdata}
+      GATEWAY_DATABASE_URL: postgresql://gateway_rw:${GATEWAY_RW_PASSWORD:-gateway_rw_dev_only}@db:5432/${POSTGRES_DB:-bankdata}
+      # Ollama runs on the host (Metal GPU); reach it from the container
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1
+    depends_on:
+      db: {condition: service_healthy}
+    ports:
+      - "${API_PORT:-8200}:8200"
+
+  web:
+    build: {context: .., dockerfile: infra/web.Dockerfile}
+    depends_on: [api]
+    ports:
+      - "${WEB_PORT:-5180}:80"
+
+  # Optional Ollama in Docker (`docker compose --profile ollama up`). On a Mac prefer the
+  # host install (`brew install ollama`): Docker on macOS has no GPU, so inference is slow.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - bcai_ollama:/root/.ollama
+
+volumes:
+  bcai_pg:
+  bcai_ollama:

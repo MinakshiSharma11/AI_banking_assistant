@@ -1,0 +1,11 @@
+metric: sla_breach_rate
+label: SLA breach rate
+description: Stage visits that breached their SLA divided by all exited visits of stages that have an SLA.
+entity: wf_stage_history
+measure: {agg: ratio, numerator: "t.sla_breached", denominator: "TRUE"}
+time_dimension: exited_at
+default_filters:
+  - "st.sla_hours IS NOT NULL"
+dimensions: [workflow, stage, branch, region, actor_role]
+synonyms: [SLA breaches, SLA misses, late stages, breach rate, نسبة تجاوز اتفاقية مستوى الخدمة]
+unit: ratio

@@ -1,0 +1,11 @@
+metric: failed_logins
+label: Failed logins
+description: Failed OBDX login attempts (login status 'F') in the period.
+entity: digx_user_session
+measure: {agg: count}
+time_dimension: login_at
+default_filters:
+  - "login_status = 'F'"
+dimensions: [failure_reason, channel, device_os, branch, region]
+synonyms: [login failures, failed sign-ins, unsuccessful logins, محاولات الدخول الفاشلة, فشل تسجيل الدخول]
+unit: attempts

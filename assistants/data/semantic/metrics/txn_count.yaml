@@ -1,0 +1,11 @@
+metric: txn_count
+label: Transactions
+description: Posted transactions (status 'P') with a business date in the period.
+entity: transaction
+measure: {agg: count}
+time_dimension: txn_date
+default_filters:
+  - "status = 'P'"
+dimensions: [channel, txn_group, drcr, branch, region]
+synonyms: [transaction count, number of transactions, transaction volume, txns, عدد المعاملات, عدد العمليات]
+unit: transactions

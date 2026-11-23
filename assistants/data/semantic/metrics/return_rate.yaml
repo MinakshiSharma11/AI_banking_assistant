@@ -1,0 +1,9 @@
+metric: return_rate
+label: Return rate
+description: Stage visits that ended with RETURN (sent back for documents) divided by all exited visits.
+entity: wf_stage_history
+measure: {agg: ratio, numerator: "t.action = 'RETURN'", denominator: "TRUE"}
+time_dimension: exited_at
+dimensions: [workflow, stage, branch, region]
+synonyms: [sent back, returns, rework rate, send-back rate, نسبة الإرجاع]
+unit: ratio

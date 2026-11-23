@@ -1,0 +1,12 @@
+metric: loan_amount_requested_kwd
+label: Loan amount requested (KWD)
+description: Sum of the requested amount on personal-loan applications created in the period (decoded payloads, both versions).
+entity: wf_instance_flat
+measure: {agg: sum, column: amount_requested}
+time_dimension: created_at
+default_filters:
+  - "i.wf_code = 'LOAN_ORIG'"
+dimensions: [product, purpose, branch, region, salary_band]
+synonyms: [requested amount, loan demand, amount applied for, المبلغ المطلوب, قيمة القروض المطلوبة]
+unit: KWD
+decimals: 3

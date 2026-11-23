@@ -1,0 +1,5 @@
+# Project model for the data agent: qwen3:8b with an 8k context window that fits the
+# planner prompt (~4k tokens of catalogue + examples + conversation).
+# Build: make ollama-model   (Ollama's OpenAI-compatible API cannot set num_ctx per call)
+FROM qwen3:8b
+PARAMETER num_ctx 8192

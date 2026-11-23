@@ -1,0 +1,94 @@
+{
+ "runs": [
+  {
+   "summary": {
+    "provider": "ollama",
+    "model": "bcai-qwen3-8b",
+    "cases": 1,
+    "overall": [
+     1,
+     1
+    ],
+    "paths": {
+     "metric": [
+      0,
+      0
+     ],
+     "sql": [
+      0,
+      0
+     ],
+     "api": [
+      0,
+      0
+     ],
+     "clarify": [
+      1,
+      1
+     ],
+     "refused": [
+      0,
+      0
+     ]
+    },
+    "english": [
+     1,
+     1
+    ],
+    "arabic": [
+     0,
+     0
+    ],
+    "security": [
+     0,
+     0
+    ],
+    "security_held": [
+     0,
+     0
+    ],
+    "ttfa_p50_s": 58.953,
+    "ttfa_p95_s": 58.953,
+    "metric_ttfa_p50_s": null,
+    "total_p50_s": 59.141,
+    "total_p95_s": 59.141,
+    "tokens_in": 13769,
+    "tokens_out": 119,
+    "tokens_per_question": 13888,
+    "cost_usd": 0.0,
+    "retries": 1,
+    "structured_fallbacks": 1,
+    "templated_answers": 0
+   },
+   "results": [
+    {
+     "id": "E32",
+     "lang": "en",
+     "question": "accounts opened by Hawaii last quarter",
+     "expected_route": "clarify",
+     "route": "clarify",
+     "status": "ok",
+     "passed": true,
+     "reason": "route matches",
+     "security": false,
+     "latency_ms": 59141,
+     "first_answer_ms": 58953,
+     "input_tokens": 13769,
+     "output_tokens": 119,
+     "grounded": null,
+     "plan": {
+      "reason": "other",
+      "message": "Hawaii is not a valid branch in the system."
+     },
+     "answer": "There's no branch called 'Hawaii'. Did you mean: Hawalli",
+     "attempts": 2,
+     "fallback": "structured_output",
+     "rows": [],
+     "columns": [],
+     "security_held": null
+    }
+   ]
+  }
+ ],
+ "skipped": {}
+}

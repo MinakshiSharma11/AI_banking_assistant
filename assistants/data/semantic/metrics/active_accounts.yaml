@@ -1,0 +1,14 @@
+metric: active_accounts
+label: Active accounts
+description: >
+  Authorised accounts that were open at the end of the period (opened on or before the
+  last day and not closed by then). A snapshot, not a flow.
+entity: cust_account
+kind: snapshot
+measure: {agg: count_distinct, column: account_no}
+snapshot: {valid_from: account_open_date, valid_to: closed_date}
+default_filters:
+  - "auth_stat = 'A'"
+dimensions: [branch, region, account_class, product_family, segment]
+synonyms: [account base, live accounts, total accounts, accounts currently open, الحسابات النشطة, الحسابات القائمة, رصيد الحسابات القائمة]
+unit: accounts

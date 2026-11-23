@@ -1,0 +1,78 @@
+# Atumverse payload field map: how the decoder fills atum.wf_instance_flat.
+#
+# One entry per output column: a JSON path per wf_code and payload version, a type and an
+# optional transform. A new payload version is a YAML change here, not a code change.
+# Paths are dotted ($.a.b). A path that runs into a non-object, a wrong type, a value too
+# long for its column, or a missing `required` field makes the payload malformed: the
+# instance goes to atum.decode_error and is never half-written.
+
+bands:
+  salary_band:          # raw monthly salary never leaves the decoder
+    - {lt: 1000, label: "<1000"}
+    - {lt: 2500, label: "1000-2499"}
+    - {label: "2500+"}
+  credit_score_band:
+    - {lt: 600, label: "<600"}
+    - {lt: 700, label: "600-699"}
+    - {label: "700+"}
+
+versions:               # payload versions the decoder understands, per workflow
+  LOAN_ORIG: [1, 2]
+  CASA_ONBOARD: [1]
+
+fields:
+  product:
+    type: str
+    max_length: 10
+    required: [LOAN_ORIG, CASA_ONBOARD]
+    paths:
+      LOAN_ORIG: {1: $.product, 2: $.loan.product}
+      CASA_ONBOARD: {1: $.account.product}
+  purpose:
+    type: str
+    max_length: 12
+    paths:
+      LOAN_ORIG: {1: $.purpose, 2: $.loan.purpose}
+  amount_requested:
+    type: decimal
+    required: [LOAN_ORIG]
+    paths:
+      LOAN_ORIG: {1: $.loanAmount, 2: $.loan.amountRequested}
+  tenor_months:
+    type: int
+    paths:
+      LOAN_ORIG: {1: $.tenorMonths, 2: $.loan.tenorMonths}
+  salary_band:
+    type: decimal
+    transform: band:salary_band
+    max_length: 9
+    required: [LOAN_ORIG, CASA_ONBOARD]
+    paths:
+      LOAN_ORIG: {1: $.monthlySalary, 2: $.applicant.monthlySalary}
+      CASA_ONBOARD: {1: $.applicant.monthlySalary}
+  employment_type:
+    type: str
+    max_length: 12
+    paths:
+      LOAN_ORIG: {1: $.employmentType, 2: $.applicant.employmentType}
+      CASA_ONBOARD: {1: $.applicant.employmentType}
+  credit_score_band:
+    type: int
+    transform: band:credit_score_band
+    max_length: 7
+    paths:
+      LOAN_ORIG: {1: $.creditScore, 2: $.credit.score}
+  dbr_pct:              # stored in the payload as a fraction (0.38), shown as percent
+    type: decimal
+    transform: scale:100
+    paths:
+      LOAN_ORIG: {1: $.dbr, 2: $.credit.dbr}
+  decision:
+    type: str
+    max_length: 8
+    paths:
+      LOAN_ORIG: {1: $.decision, 2: $.credit.decision}
+  amount_approved:
+    type: decimal
+    paths:
+      LOAN_ORIG: {1: $.amountApproved, 2: $.offer.amountApproved}

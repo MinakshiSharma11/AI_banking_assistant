@@ -1,0 +1,24 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: bcai
+          POSTGRES_PASSWORD: bcai_dev_only
+          POSTGRES_DB: bankdata
+        ports: ["5544:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bcai -d bankdata"
+          --health-interval 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: cp .env.example .env
+      - run: uv sync --python 3.12
+      - run: make lint
+      - run: make seed
+      - run: make test

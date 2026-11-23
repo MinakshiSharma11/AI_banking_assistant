@@ -1,0 +1,16 @@
+metric: avg_session_minutes
+label: Average session length (minutes)
+description: >
+  Mean minutes from login to logout (or to last activity when the user never logged
+  out), for successful sessions that started in the period.
+entity: digx_user_session
+measure:
+  agg: avg
+  expr: "EXTRACT(EPOCH FROM (COALESCE(t.logout_at, t.last_activity_at) - t.login_at)) / 60"
+time_dimension: login_at
+default_filters:
+  - "login_status = 'S'"
+dimensions: [channel, device_os]
+synonyms: [session duration, session length, time spent, متوسط مدة الجلسة]
+unit: minutes
+decimals: 1

@@ -1,0 +1,11 @@
+metric: failed_txn_rate
+label: Failed transaction rate
+description: Failed transactions divided by posted plus failed transactions (reversals excluded).
+entity: transaction
+measure: {agg: ratio, numerator: "t.status = 'F'", denominator: "TRUE"}
+time_dimension: txn_date
+default_filters:
+  - "status IN ('P', 'F')"
+dimensions: [channel, txn_group, branch, region]
+synonyms: [transaction failure rate, failure rate, failed transactions percentage, نسبة المعاملات الفاشلة]
+unit: ratio

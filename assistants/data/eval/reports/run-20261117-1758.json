@@ -1,0 +1,186 @@
+{
+ "runs": [
+  {
+   "summary": {
+    "provider": "ollama",
+    "model": "bcai-qwen3-8b",
+    "cases": 2,
+    "overall": [
+     1,
+     2
+    ],
+    "paths": {
+     "metric": [
+      1,
+      2
+     ],
+     "sql": [
+      0,
+      0
+     ],
+     "api": [
+      0,
+      0
+     ],
+     "clarify": [
+      0,
+      0
+     ],
+     "refused": [
+      0,
+      0
+     ]
+    },
+    "english": [
+     1,
+     2
+    ],
+    "arabic": [
+     0,
+     0
+    ],
+    "security": [
+     0,
+     0
+    ],
+    "security_held": [
+     0,
+     0
+    ],
+    "ttfa_p50_s": 33.732,
+    "ttfa_p95_s": 37.403,
+    "metric_ttfa_p50_s": 33.732,
+    "total_p50_s": 34.058,
+    "total_p95_s": 37.932,
+    "tokens_in": 9499,
+    "tokens_out": 169,
+    "tokens_per_question": 4834,
+    "cost_usd": 0.0,
+    "retries": 0,
+    "structured_fallbacks": 0,
+    "templated_answers": 1
+   },
+   "results": [
+    {
+     "id": "E06",
+     "lang": "en",
+     "question": "Now only for Salmiya",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": false,
+     "reason": "missing expected row [datetime.date(2025, 12, 1), 'Mobile', Decimal('34007.279')]",
+     "security": false,
+     "latency_ms": 37932,
+     "first_answer_ms": 37403,
+     "input_tokens": 4727,
+     "output_tokens": 93,
+     "grounded": true,
+     "plan": {
+      "metric": "txn_value_kwd",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [
+       {
+        "dimension": "branch",
+        "op": "in",
+        "values": [
+         "Salmiya"
+        ]
+       },
+       {
+        "dimension": "channel",
+        "op": "in",
+        "values": [
+         "MOBILE",
+         "WEB"
+        ]
+       }
+      ],
+      "time": {
+       "period": "today"
+      },
+      "grain": "month"
+     },
+     "answer": "The transaction value for Salmiya branches via Mobile is 37,543.04 KWD and via Web is 25,085.12 KWD for the period 17 Nov 2026.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "2026-11-01",
+       "Mobile",
+       37543.043
+      ],
+      [
+       "2026-11-01",
+       "Web",
+       25085.121
+      ]
+     ],
+     "columns": [
+      "period",
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E33",
+     "lang": "en",
+     "question": "give me the total value for web and mobile",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "2 row(s) match",
+     "security": false,
+     "latency_ms": 30184,
+     "first_answer_ms": 30061,
+     "input_tokens": 4772,
+     "output_tokens": 76,
+     "grounded": false,
+     "plan": {
+      "time": {
+       "period": "last_12_months"
+      },
+      "grain": "month",
+      "metric": "txn_value_kwd",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [
+       {
+        "dimension": "channel",
+        "op": "in",
+        "values": [
+         "MOBILE",
+         "WEB"
+        ]
+       }
+      ]
+     },
+     "answer": "Transaction value (KWD) (last 12 months (1 Dec 2025 – 17 Nov 2026)): Mobile: 10,634,264.166; Web: 3,127,798.595.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Mobile",
+       10634264.166
+      ],
+      [
+       "Web",
+       3127798.595
+      ]
+     ],
+     "columns": [
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    }
+   ]
+  }
+ ],
+ "skipped": {}
+}

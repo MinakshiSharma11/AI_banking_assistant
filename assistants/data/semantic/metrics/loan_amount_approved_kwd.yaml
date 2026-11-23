@@ -1,0 +1,13 @@
+metric: loan_amount_approved_kwd
+label: Loan amount approved (KWD)
+description: Sum of the approved amount on personal-loan applications created in the period with decision APPROVE.
+entity: wf_instance_flat
+measure: {agg: sum, column: amount_approved}
+time_dimension: created_at
+default_filters:
+  - "i.wf_code = 'LOAN_ORIG'"
+  - "decision = 'APPROVE'"
+dimensions: [product, purpose, branch, region]
+synonyms: [approved amount, loans approved value, sanctioned amount, المبلغ الموافق عليه]
+unit: KWD
+decimals: 3

@@ -1,0 +1,13 @@
+metric: avg_dbr_pct
+label: Average debt-burden ratio (%)
+description: Mean debt-burden ratio (DBR, percent of salary) on assessed personal-loan applications created in the period.
+entity: wf_instance_flat
+measure: {agg: avg, column: dbr_pct}
+time_dimension: created_at
+default_filters:
+  - "i.wf_code = 'LOAN_ORIG'"
+  - "dbr_pct IS NOT NULL"
+dimensions: [product, salary_band, decision, branch, region]
+synonyms: [DBR, debt burden ratio, debt to income, متوسط نسبة عبء الدين]
+unit: percent
+decimals: 1

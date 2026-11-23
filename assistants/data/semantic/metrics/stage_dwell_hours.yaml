@@ -1,0 +1,10 @@
+metric: stage_dwell_hours
+label: Average time in stage (hours)
+description: Mean hours between entering and leaving a stage, for stage visits exited in the period.
+entity: wf_stage_history
+measure: {agg: avg, expr: "EXTRACT(EPOCH FROM (t.exited_at - t.entered_at)) / 3600"}
+time_dimension: exited_at
+dimensions: [workflow, stage, branch, region, actor_role]
+synonyms: [dwell time, time in stage, stage duration, turnaround time per stage, متوسط الوقت في المرحلة]
+unit: hours
+decimals: 1

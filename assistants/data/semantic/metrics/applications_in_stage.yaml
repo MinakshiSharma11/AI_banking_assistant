@@ -1,0 +1,13 @@
+metric: applications_in_stage
+label: Applications in stage (now)
+description: >
+  Atumverse cases still in progress, by their current stage, as of now. A live
+  snapshot: any period in the question is ignored.
+entity: wf_instance
+kind: current
+measure: {agg: count}
+default_filters:
+  - "status = 'IN_PROGRESS'"
+dimensions: [workflow, stage, branch, region, product]
+synonyms: [pipeline, work in progress, pending applications, queue, applications sitting in, الطلبات قيد الإجراء]
+unit: applications

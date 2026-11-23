@@ -1,0 +1,13 @@
+metric: accounts_opened
+label: Accounts opened
+description: >
+  Authorised CASA and TD accounts whose account open date falls in the period,
+  any channel. Includes accounts closed later.
+entity: cust_account
+measure: {agg: count_distinct, column: account_no}
+time_dimension: account_open_date
+default_filters:
+  - "auth_stat = 'A'"
+dimensions: [branch, region, account_class, product_family, segment, channel]
+synonyms: [new accounts, account openings, accounts created, حسابات جديدة, الحسابات الجديدة, فتح حسابات, الحسابات المفتوحة خلال فترة, الحسابات التي تم فتحها]
+unit: accounts

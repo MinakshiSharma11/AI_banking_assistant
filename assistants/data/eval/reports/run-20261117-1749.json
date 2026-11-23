@@ -1,0 +1,585 @@
+{
+ "runs": [
+  {
+   "summary": {
+    "provider": "ollama",
+    "model": "bcai-qwen3-8b",
+    "cases": 8,
+    "overall": [
+     6,
+     8
+    ],
+    "paths": {
+     "metric": [
+      6,
+      8
+     ],
+     "sql": [
+      0,
+      0
+     ],
+     "api": [
+      0,
+      0
+     ],
+     "clarify": [
+      0,
+      0
+     ],
+     "refused": [
+      0,
+      0
+     ]
+    },
+    "english": [
+     5,
+     7
+    ],
+    "arabic": [
+     1,
+     1
+    ],
+    "security": [
+     0,
+     0
+    ],
+    "security_held": [
+     0,
+     0
+    ],
+    "ttfa_p50_s": 25.787,
+    "ttfa_p95_s": 44.259,
+    "metric_ttfa_p50_s": 25.787,
+    "total_p50_s": 25.9045,
+    "total_p95_s": 44.453,
+    "tokens_in": 36597,
+    "tokens_out": 489,
+    "tokens_per_question": 4636,
+    "cost_usd": 0.0,
+    "retries": 0,
+    "structured_fallbacks": 0,
+    "templated_answers": 5
+   },
+   "results": [
+    {
+     "id": "E01",
+     "lang": "en",
+     "question": "How many accounts were opened last quarter by branch?",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "12 row(s) match",
+     "security": false,
+     "latency_ms": 44453,
+     "first_answer_ms": 44259,
+     "input_tokens": 4501,
+     "output_tokens": 61,
+     "grounded": false,
+     "plan": {
+      "dimensions": [
+       "branch"
+      ],
+      "filters": [],
+      "time": {
+       "period": "last_quarter"
+      },
+      "order_by": {
+       "dir": "desc",
+       "field": "value"
+      },
+      "metric": "accounts_opened"
+     },
+     "answer": "Accounts opened (last quarter (1 Jul 2026 – 30 Sep 2026)): Salmiya: 291; Kuwait City Main: 250; Fahaheel: 174; Hawalli: 149; Sharq: 135 (and 7 more).",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Salmiya",
+       291
+      ],
+      [
+       "Kuwait City Main",
+       250
+      ],
+      [
+       "Fahaheel",
+       174
+      ],
+      [
+       "Hawalli",
+       149
+      ],
+      [
+       "Sharq",
+       135
+      ],
+      [
+       "Jahra",
+       124
+      ],
+      [
+       "Mangaf",
+       123
+      ],
+      [
+       "Ahmadi",
+       117
+      ],
+      [
+       "Doha",
+       109
+      ],
+      [
+       "Wafra",
+       93
+      ],
+      [
+       "Sulaibikhat",
+       81
+      ],
+      [
+       "Abdali",
+       74
+      ]
+     ],
+     "columns": [
+      "branch",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E02",
+     "lang": "en",
+     "question": "Accounts opened digitally vs in branch this year",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "3 row(s) match",
+     "security": false,
+     "latency_ms": 15467,
+     "first_answer_ms": 15388,
+     "input_tokens": 4496,
+     "output_tokens": 44,
+     "grounded": false,
+     "plan": {
+      "metric": "accounts_opened",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [],
+      "time": {
+       "period": "ytd"
+      }
+     },
+     "answer": "Accounts opened (ytd (1 Jan 2026 – 17 Nov 2026)): BRANCH: 2,807; MOBILE: 1,964; WEB: 635.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "BRANCH",
+       2807
+      ],
+      [
+       "MOBILE",
+       1964
+      ],
+      [
+       "WEB",
+       635
+      ]
+     ],
+     "columns": [
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E06",
+     "lang": "en",
+     "question": "Now only for Salmiya",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": false,
+     "reason": "missing expected row [datetime.date(2025, 12, 1), 'Mobile', Decimal('34007.279')]",
+     "security": false,
+     "latency_ms": 29190,
+     "first_answer_ms": 29127,
+     "input_tokens": 4729,
+     "output_tokens": 93,
+     "grounded": true,
+     "plan": {
+      "metric": "txn_value_kwd",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [
+       {
+        "dimension": "branch",
+        "op": "in",
+        "values": [
+         "Salmiya"
+        ]
+       },
+       {
+        "dimension": "channel",
+        "op": "in",
+        "values": [
+         "MOBILE",
+         "WEB"
+        ]
+       }
+      ],
+      "time": {
+       "period": "today"
+      },
+      "grain": "month"
+     },
+     "answer": "The transaction value for Salmiya branches via Mobile is 37,543.04 KWD and via Web is 25,085.12 KWD for the period today (17 Nov 2026).",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "2026-11-01",
+       "Mobile",
+       37543.043
+      ],
+      [
+       "2026-11-01",
+       "Web",
+       25085.121
+      ]
+     ],
+     "columns": [
+      "period",
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E23",
+     "lang": "en",
+     "question": "Transaction count by transaction group last week",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "5 row(s) match",
+     "security": false,
+     "latency_ms": 24214,
+     "first_answer_ms": 24114,
+     "input_tokens": 4519,
+     "output_tokens": 50,
+     "grounded": true,
+     "plan": {
+      "grain": "day",
+      "metric": "txn_count",
+      "dimensions": [
+       "txn_group"
+      ],
+      "filters": [],
+      "time": {
+       "period": "last_week"
+      }
+     },
+     "answer": "Last week (8 Nov 2026 – 14 Nov 2026), the transaction counts by transaction group for the specified branches were: TRANSFER 7,172, CASH 6,365, CARD 4,720, BILLPAY 3,232, and CHARGE 802. No more rows exist.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "TRANSFER",
+       7172
+      ],
+      [
+       "CASH",
+       6365
+      ],
+      [
+       "CARD",
+       4720
+      ],
+      [
+       "BILLPAY",
+       3232
+      ],
+      [
+       "CHARGE",
+       802
+      ]
+     ],
+     "columns": [
+      "txn_group",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E24",
+     "lang": "en",
+     "question": "Failed transaction rate by channel this month",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "5 row(s) match",
+     "security": false,
+     "latency_ms": 25145,
+     "first_answer_ms": 25060,
+     "input_tokens": 4526,
+     "output_tokens": 50,
+     "grounded": true,
+     "plan": {
+      "grain": "month",
+      "metric": "failed_txn_rate",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [],
+      "time": {
+       "period": "this_month"
+      }
+     },
+     "answer": "The failed transaction rate this month (1 Nov 2026 – 17 Nov 2026) by channel is: Web 2.14%, Mobile 2.12%, POS 2.03%, Branch 1.97%, and ATM 1.81%. The rates are consistent across channels.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Web",
+       0.0214
+      ],
+      [
+       "Mobile",
+       0.0212
+      ],
+      [
+       "POS",
+       0.0203
+      ],
+      [
+       "Branch",
+       0.0197
+      ],
+      [
+       "ATM",
+       0.0181
+      ]
+     ],
+     "columns": [
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E25",
+     "lang": "en",
+     "question": "How many account-opening cases were completed last month?",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": false,
+     "reason": "missing expected row [149]",
+     "security": false,
+     "latency_ms": 20635,
+     "first_answer_ms": 20536,
+     "input_tokens": 4509,
+     "output_tokens": 64,
+     "grounded": false,
+     "plan": {
+      "metric": "applications_completed",
+      "dimensions": [
+       "branch"
+      ],
+      "filters": [
+       {
+        "dimension": "workflow",
+        "op": "in",
+        "values": [
+         "CASA_ONBOARD"
+        ]
+       }
+      ],
+      "time": {
+       "period": "last_month"
+      }
+     },
+     "answer": "Applications completed (last month (1 Oct 2026 – 31 Oct 2026)): Kuwait City Main: 31; Hawalli: 20; Salmiya: 16; Fahaheel: 16; Jahra: 16 (and 7 more).",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Kuwait City Main",
+       31
+      ],
+      [
+       "Hawalli",
+       20
+      ],
+      [
+       "Salmiya",
+       16
+      ],
+      [
+       "Fahaheel",
+       16
+      ],
+      [
+       "Jahra",
+       16
+      ],
+      [
+       "Ahmadi",
+       11
+      ],
+      [
+       "Mangaf",
+       10
+      ],
+      [
+       "Sharq",
+       8
+      ],
+      [
+       "Wafra",
+       6
+      ],
+      [
+       "Abdali",
+       6
+      ],
+      [
+       "Doha",
+       5
+      ],
+      [
+       "Sulaibikhat",
+       4
+      ]
+     ],
+     "columns": [
+      "branch",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "E33",
+     "lang": "en",
+     "question": "give me the total value for web and mobile",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "2 row(s) match",
+     "security": false,
+     "latency_ms": 26664,
+     "first_answer_ms": 26514,
+     "input_tokens": 4769,
+     "output_tokens": 76,
+     "grounded": false,
+     "plan": {
+      "grain": "month",
+      "metric": "txn_value_kwd",
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [
+       {
+        "dimension": "channel",
+        "op": "in",
+        "values": [
+         "MOBILE",
+         "WEB"
+        ]
+       }
+      ],
+      "time": {
+       "period": "last_12_months"
+      }
+     },
+     "answer": "Transaction value (KWD) (last 12 months (1 Dec 2025 – 17 Nov 2026)): Mobile: 10,634,264.166; Web: 3,127,798.595.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Mobile",
+       10634264.166
+      ],
+      [
+       "Web",
+       3127798.595
+      ]
+     ],
+     "columns": [
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    },
+    {
+     "id": "A06",
+     "lang": "ar",
+     "question": "قيمة المعاملات حسب القناة هذا الشهر",
+     "expected_route": "metric",
+     "route": "metric",
+     "status": "ok",
+     "passed": true,
+     "reason": "5 row(s) match",
+     "security": false,
+     "latency_ms": 27467,
+     "first_answer_ms": 27410,
+     "input_tokens": 4548,
+     "output_tokens": 51,
+     "grounded": false,
+     "plan": {
+      "dimensions": [
+       "channel"
+      ],
+      "filters": [],
+      "time": {
+       "period": "this_month"
+      },
+      "grain": "month",
+      "metric": "txn_value_kwd"
+     },
+     "answer": "Transaction value (KWD) (this month (1 Nov 2026 – 17 Nov 2026)): Branch: 4,279,425.796; Mobile: 2,744,910.477; ATM: 862,812.174; Web: 759,101.701; POS: 208,400.624.",
+     "attempts": 1,
+     "fallback": null,
+     "rows": [
+      [
+       "Branch",
+       4279425.796
+      ],
+      [
+       "Mobile",
+       2744910.477
+      ],
+      [
+       "ATM",
+       862812.174
+      ],
+      [
+       "Web",
+       759101.701
+      ],
+      [
+       "POS",
+       208400.624
+      ]
+     ],
+     "columns": [
+      "channel",
+      "value"
+     ],
+     "security_held": null
+    }
+   ]
+  }
+ ],
+ "skipped": {}
+}

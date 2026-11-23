@@ -1,0 +1,11 @@
+metric: accounts_closed
+label: Accounts closed
+description: Accounts with record status closed ('C') whose closed date falls in the period.
+entity: cust_account
+measure: {agg: count_distinct, column: account_no}
+time_dimension: closed_date
+default_filters:
+  - "record_stat = 'C'"
+dimensions: [branch, region, account_class, product_family]
+synonyms: [closures, closed accounts, account closures, الحسابات المغلقة, إغلاق الحسابات]
+unit: accounts

@@ -1,0 +1,12 @@
+metric: approval_rate
+label: Loan approval rate
+description: APPROVE decisions divided by APPROVE plus REJECT decisions at the loan APPROVAL stage, decided in the period.
+entity: wf_stage_history
+measure: {agg: ratio, numerator: "t.action = 'APPROVE'", denominator: "TRUE"}
+time_dimension: exited_at
+default_filters:
+  - "stage_code = 'APPROVAL'"
+  - "action IN ('APPROVE', 'REJECT')"
+dimensions: [branch, region, product]
+synonyms: [approval ratio, credit approval rate, loans approved percentage, نسبة الموافقة, نسبة الموافقة على القروض]
+unit: ratio

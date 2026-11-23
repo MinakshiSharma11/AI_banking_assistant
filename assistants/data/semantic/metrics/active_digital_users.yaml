@@ -1,0 +1,11 @@
+metric: active_digital_users
+label: Active digital users
+description: Distinct OBDX users with at least one successful login in the period.
+entity: digx_user_session
+measure: {agg: count_distinct, column: user_id}
+time_dimension: login_at
+default_filters:
+  - "login_status = 'S'"
+dimensions: [channel, device_os, branch, region]
+synonyms: [active users, digital active users, MAU, DAU, monthly active users, المستخدمون النشطون]
+unit: users

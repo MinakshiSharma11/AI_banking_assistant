@@ -1,0 +1,11 @@
+metric: logins
+label: Successful logins
+description: Successful OBDX logins (login status 'S') in the period.
+entity: digx_user_session
+measure: {agg: count}
+time_dimension: login_at
+default_filters:
+  - "login_status = 'S'"
+dimensions: [channel, device_os, branch, region, hour]
+synonyms: [logins, sign-ins, successful logins, sessions started, تسجيلات الدخول, عمليات الدخول]
+unit: logins
